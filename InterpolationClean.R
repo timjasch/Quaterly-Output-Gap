@@ -3,14 +3,14 @@ library(tidyverse)
 library(dplyr)
 library(zoo)
 library(tempdisagg)
-
+ 
 #### Read in the Excel files ####
 # Real GDP (2015 Mrd-MarkEuro, Quaterly). Source: AMECO.
-real_gdp <- read_excel("Real GDP.xlsx")
+real_gdp <- read_excel("AMECO_Real_GDP.xlsx")
 # Potential GDP (2015 Mrd-MarkEuro, Yearly). Source: AMECO.
-potential_gdp <- read_excel("Potential GDP.xlsx")
+potential_gdp <- read_excel("AMECO_Potential_GDP.xlsx")
 # Output Gap (Percent, Yearly). Source: WEO. 
-output_gap_weo <- read_excel("WEO_Data.xlsx")
+output_gap_weo <- read_excel("WEO_Real_GDP.xlsx")
 output_gap_weo$'Output Gap' <- output_gap_weo$'Output Gap'/100
 
 # Create Time-Series Objects
