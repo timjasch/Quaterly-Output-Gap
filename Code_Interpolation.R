@@ -6,7 +6,7 @@ library(tempdisagg)
  
 #### Read in the Excel files ####
 # Real GDP (2015 Mrd-MarkEuro, Quaterly). Source: AMECO.
-real_gdp <- read_excel("AMECO_Real_GDP.xlsx")
+real_gdp <- read_excel("DESTATIS_Real_GDP.xlsx")
 # Potential GDP (2015 Mrd-MarkEuro, Yearly). Source: AMECO.
 potential_gdp <- read_excel("AMECO_Potential_GDP.xlsx")
 # Output Gap (Percent, Yearly). Source: WEO. 
