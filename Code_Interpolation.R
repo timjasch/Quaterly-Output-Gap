@@ -11,7 +11,7 @@ real_gdp <- read_excel("DESTATIS_Real_GDP.xlsx")
 potential_gdp <- read_excel("AMECO_Potential_GDP.xlsx")
 # Output Gap (Percent, Yearly). Source: WEO. 
 output_gap_weo <- read_excel("WEO_Real_GDP.xlsx")
-output_gap_weo$'Output Gap' <- output_gap_weo$'Output Gap'/100
+output_gap_weo$output_gap <- output_gap_weo$'Output Gap'/100
 
 # Create Time-Series Objects
 real_gdp_quarterly_ts <- ts(real_gdp$`Real GDP`, start = c(1991, 1), frequency = 4)
@@ -43,98 +43,93 @@ mean(quaterly_data$output_gap)
 
 #### Graphs ####
 
+# Define colors
+red <- "#8B0000"
+blue <- "#00008B"
+orange <- "#cc6e1b"
+
+
+# Plot the real and potential GDP over time (1991-2024)
 potential_real_plot <- quaterly_data %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = potential_gdp, color = "Potential GDP")) +
   geom_line(aes(y = real_gdp, color = "Real GDP")) +
   theme_minimal() +
-  scale_color_manual(values = c("Potential GDP" = "blue", "Real GDP" = "red")) +
-  labs(title = "Real GDP vs Potential GDP",
+  scale_color_manual(values = c("Potential GDP" = blue, "Real GDP" = red)) +
+  labs(title = "Real and Potential GDP 1991-2024 (Potential Interpolated), Quaterly Frequency",
     x = "Year",
-    y = "GDP (Billion Euro)") +
-  theme(legend.position = "top")
+    y = "GDP (2015 Billion Euro)") +
+  theme(legend.position = "bottom") +
+  labs(color = NULL)
 
+# Plot the output gap over time (1991-2024)
 output_gap_plot <- quaterly_data %>%
-  ggplot(aes(x = date, y = output_gap)) +
-  geom_line(color = "blue") +
+  ggplot(aes(x = date, y = (100*output_gap))) +
+  geom_line(color = orange) +
   theme_minimal() +
-  labs(title = "Output Gap over Time (Interpolated)",
+  labs(title = "Output Gap 1991-2024 (Interpolated), Quaterly Frequency",
     x = "Year",
-    y = "Output Gap") +
+    y = "Output Gap in %") +
   theme(legend.position = "none") +
-  ylim(-0.10, 0.10)
+  ylim(-10, 10)
 
+# Filter the data for the years 2019-2024
 quaterly_data_recent <- quaterly_data %>%
     filter(date >= as.Date("2019-01-01"))
 
+# Plot the real and potential GDP over time (2019-2024)
 potential_real_plot_recent <- quaterly_data_recent %>%
-    ggplot(aes(x = date)) +
-    geom_line(aes(y = log(potential_gdp), color = "Potential GDP")) +
-    geom_line(aes(y = log(real_gdp), color = "Real GDP")) +
-    theme_minimal() +
-    scale_color_manual(values = c("Potential GDP" = "blue", "Real GDP" = "red")) +
-    labs(title = "Real GDP vs Potential GDP (Starting 2019)",
-        x = "Year",
-        y = "Log GDP (Billion Euro)") +
-    theme(legend.position = "top")
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = potential_gdp, color = "Potential GDP")) +
+  geom_line(aes(y = real_gdp, color = "Real GDP")) +
+  theme_minimal() +
+  scale_color_manual(values = c("Potential GDP" = blue, "Real GDP" = red)) +
+  labs(title = "Real and Potential GDP 2019-2024 (Potential Interpolated), Quaterly Frequency",
+    x = "Year",
+    y = "GDP (2015 Billion Euro)") +
+  theme(legend.position = "bottom") +
+  labs(color = NULL)
 
+# Plot the output gap over time (2019-2024)
 output_gap_plot_recent <- quaterly_data_recent %>%
-    ggplot(aes(x = date, y = output_gap)) +
-    geom_line(color = "blue") +
-    theme_minimal() +
-    labs(title = "Output Gap over Time (Interpolated, Starting 2019)",
-        x = "Year",
-        y = "Output Gap") +
-    theme(legend.position = "none") +
-  ylim(-0.10, 0.10)
+  ggplot(aes(x = date, y = (100*output_gap))) +
+  geom_line(color = orange) +
+  theme_minimal() +
+  labs(title = "Output Gap 2019-2024 (Interpolated), Quaterly Frequency",
+    x = "Year",
+    y = "Output Gap in %") +
+  theme(legend.position = "none") +
+  ylim(-10, 10)
 
-# Plot output gap data from WEO
+#### Comparing the output gap from the WEO with the interpolated output gap ####
+
+# Plot the output gap from the WEO over time (1991-2024)
 output_gap_plot_weo <- output_gap_weo %>%
-  ggplot(aes(x = Year, y = `Output Gap`)) +
-  geom_line(color = "blue") +
+  ggplot(aes(x = Year, y = (100*output_gap))) +
+  geom_line(color = orange) +
   theme_minimal() +
-  labs(title = "Output Gap over Time (WEO-Estimates)",
-       x = "Year",
-       y = "Output Gap") +
+  labs(title = "Output Gap 1991-2024 (WEO-Estimates), Yearly Frequency",
+    x = "Year",
+    y = "Output Gap in %") +
   theme(legend.position = "none") +
-  ylim(-0.10, 0.10)
+  ylim(-10, 10)
 
-# Plot output gap data from WEO
-output_gap_plot_recent_weo <- output_gap_weo %>%
+# Plot the output gap from the WEO over time (2019-2024)
+output_gap_plot_weo_recent <- output_gap_weo %>%
   filter(Year >= 2019) %>%
-  ggplot(aes(x = Year, y = `Output Gap`)) +
-  geom_line(color = "blue") +
+  ggplot(aes(x = Year, y = (100*output_gap))) +
+  geom_line(color = orange) +
   theme_minimal() +
-  labs(title = "Output Gap over Time (WEO-Estimates, Starting 2019)",
-       x = "Year",
-       y = "Output Gap") +
+  labs(title = "Output Gap 2019-2024 (WEO-Estimates), Yearly Frequency",
+    x = "Year",
+    y = "Output Gap in %") +
   theme(legend.position = "none") +
-  ylim(-0.10, 0.10)
+  ylim(-10, 10)
 
-output_gap_interpolated <- ts(data$output_gap, start = c(1991, 1), frequency = 4)
-#plot
-plot(output_gap_interpolated, type = "l", col = "#db4343", xlab = "Year", ylab = "Output Gap", main = "Output Gap over Time (Red = Interpolated, Blue = WEO)")
-lines(output_gap_weo_ts, col = "#6e6fae")
-
-# Combine the plots
+# Compare the plots of the interpolated output gap and the output gap from the WEO for the years 1991-2024
 combined_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_weo, nrow = 2)
 combined_plot
 
-combined_plot_after2019 <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_recent_weo, nrow = 2)
-combined_plot_after2019
-
-# Calculate the change rate of real GDP, add it to the dataframe
-data$real_gdp_change <- c(diff(real_gdp_vector) / lag(real_gdp_vector))
-# Plot the change rate of real GDP and interpolated output gap over time
-real_gdp_change_plot <- ggplot(data = data, aes(x = date)) +
-  geom_line(aes(y = real_gdp_change, color = "Change Rate of Real GDP")) +
-  geom_line(aes(y = output_gap, color = "Interpolated Output Gap")) +
-  geom_line(aes(y = output_gap_interpolated, color = "Interpolated Output Gap")) +
-  theme_minimal() +
-  scale_color_manual(values = c("Change Rate of Real GDP" = "blue", "Interpolated Output Gap" = "red", "Interpolated Output Gap" = "green")) +
-  labs(title = "Change Rate of Real GDP and Interpolated Output Gap over Time",
-       x = "Year",
-       y = "Change Rate / Output Gap") +
-  ylim(-0.10, 0.10)
-
-combined_plot_after2019 <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_recent_weo, nrow = 2)
+# Compare the plots of the interpolated output gap and the output gap from the WEO for the years 2019-2024
+combined_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_weo_recent, nrow = 2)
+combined_plot_recent
