@@ -3,6 +3,7 @@ library(tidyverse)
 library(dplyr)
 library(zoo)
 library(tempdisagg)
+library(svglite)
  
 #### Read in the Excel files ####
 # Real GDP (2015 Mrd-MarkEuro, Quaterly). Source: AMECO.
@@ -132,3 +133,8 @@ combined_plot
 # Compare the plots of the interpolated output gap and the output gap from the WEO for the years 2019-2024
 combined_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_weo_recent, nrow = 2)
 combined_plot_recent
+
+# Export the plots to a Svg file
+ggsave("output_gap_plot.svg", plot = output_gap_plot, device = "svg")
+ggsave("combined_plot.svg", plot = combined_plot, device = "svg")
+ggsave("combined_plot_recent.svg", plot = output_gap_plot_recent, device = "svg")
