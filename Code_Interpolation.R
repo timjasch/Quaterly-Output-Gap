@@ -48,7 +48,6 @@ red <- "#8B0000"
 blue <- "#00008B"
 orange <- "#cc6e1b"
 
-
 # Plot the real and potential GDP over time (1991-2024)
 potential_real_plot <- quaterly_data %>%
   ggplot(aes(x = date)) +
