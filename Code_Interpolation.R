@@ -16,29 +16,34 @@ output_gap_weo$'Output Gap' <- output_gap_weo$'Output Gap'/100
 # Create Time-Series Objects
 real_gdp_quarterly_ts <- ts(real_gdp$`Real GDP`, start = c(1991, 1), frequency = 4)
 potential_gdp_yearly_ts <- ts(potential_gdp$`Potential GDP (Ameco)`, start = c(1991, 1), frequency = 1)
+output_gap_weo_ts <- ts(output_gap_weo$`Output Gap`, start = c(1991, 1), frequency = 1)
 
 #### Interpolation & Dataframe ####
 potential_interpolated <- td(potential_gdp_yearly_ts ~ 1, to = "quarterly", method = "denton-cholette", conversion = "sum")
+# Create Time-Series Object for Interpolated Series
 potential_gdp_quaterly_ts <- ts(predict(potential_interpolated), start = c(1991, 1), frequency = 4)
 
+# Create a dataframe with the interpolated data
 potential_gdp_vector <- as.vector(potential_gdp_quaterly_ts)[1:133]
 real_gdp_vector <- as.vector(real_gdp_quarterly_ts)
 quaters <- seq(as.Date("1991-01-01"), as.Date("2024-01-01"), by = "quarter")
 
-data <- tibble(
+quaterly_data <- tibble(
   date = quaters,
-  potential_gdp = potential_gdp_vector,
-  real_gdp = real_gdp_vector,
-  output_gap = (real_gdp_vector-potential_gdp_vector)/potential_gdp_vector
+  potential_gdp = (potential_gdp_quaterly_ts)[1:133],
+  real_gdp = real_gdp_quarterly_ts,
+  output_gap = (real_gdp_quarterly_ts - (potential_gdp_quaterly_ts)[1:133])/(potential_gdp_quaterly_ts)[1:133]
 )
 
-mean(data$potential_gdp)
-mean(data$real_gdp)
-mean(data$output_gap)
+# Data Investigation
+mean(quaterly_data$potential_gdp)
+mean(quaterly_data$real_gdp)
+mean(quaterly_data$output_gap)
+# Potential and Real GDP have similar means, the output gap is close to zero.
 
 #### Graphs ####
 
-potential_real_plot <- data %>%
+potential_real_plot <- quaterly_data %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = potential_gdp, color = "Potential GDP")) +
   geom_line(aes(y = real_gdp, color = "Real GDP")) +
@@ -49,7 +54,7 @@ potential_real_plot <- data %>%
     y = "GDP (Billion Euro)") +
   theme(legend.position = "top")
 
-output_gap_plot <- data %>%
+output_gap_plot <- quaterly_data %>%
   ggplot(aes(x = date, y = output_gap)) +
   geom_line(color = "blue") +
   theme_minimal() +
@@ -59,10 +64,10 @@ output_gap_plot <- data %>%
   theme(legend.position = "none") +
   ylim(-0.10, 0.10)
 
-data_recent <- data %>%
+quaterly_data_recent <- quaterly_data %>%
     filter(date >= as.Date("2019-01-01"))
 
-potential_real_plot_recent <- data_recent %>%
+potential_real_plot_recent <- quaterly_data_recent %>%
     ggplot(aes(x = date)) +
     geom_line(aes(y = log(potential_gdp), color = "Potential GDP")) +
     geom_line(aes(y = log(real_gdp), color = "Real GDP")) +
@@ -73,7 +78,7 @@ potential_real_plot_recent <- data_recent %>%
         y = "Log GDP (Billion Euro)") +
     theme(legend.position = "top")
 
-output_gap_plot_recent <- data_recent %>%
+output_gap_plot_recent <- quaterly_data_recent %>%
     ggplot(aes(x = date, y = output_gap)) +
     geom_line(color = "blue") +
     theme_minimal() +
@@ -106,7 +111,6 @@ output_gap_plot_recent_weo <- output_gap_weo %>%
   theme(legend.position = "none") +
   ylim(-0.10, 0.10)
 
-output_gap_weo_ts <- ts(output_gap_weo$`Output Gap`, start = c(1991, 1), frequency = 1)
 output_gap_interpolated <- ts(data$output_gap, start = c(1991, 1), frequency = 4)
 #plot
 plot(output_gap_interpolated, type = "l", col = "#db4343", xlab = "Year", ylab = "Output Gap", main = "Output Gap over Time (Red = Interpolated, Blue = WEO)")
