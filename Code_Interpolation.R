@@ -4,20 +4,27 @@ library(dplyr)
 library(zoo)
 library(tempdisagg)
 library(svglite)
- 
+
 #### Read in the Excel files ####
-# Real GDP (2015 Mrd-MarkEuro, Quarterly). Source: AMECO.
-real_gdp <- read_excel("DESTATIS_Real_GDP.xlsx")
-# Potential GDP (2015 Mrd-MarkEuro, Yearly). Source: AMECO.
-potential_gdp <- read_excel("AMECO_Potential_GDP.xlsx")
+# Real GDP (2015 Mrd-MarkEuro, Quarterly). Source: DESTATIS
+destatis_data <- read_excel("DESTATIS_Data.xlsx")
+# Potential, Real GDP (2015 Mrd-MarkEuro, Yearly).
+# Output Gap (in % of Potential GDP, Yearly). Source: AMECO.
+ameco_data <- read_excel("AMECO_Data.xlsx")
+# Delete the first 5 rows
+ameco_data <- ameco_data[-c(1:5), ]
+ameco_data <- as.data.frame(lapply(ameco_data, as.numeric))
+ameco_data <- ameco_data %>% mutate(output_gap = output_gap/100)
+
 # Output Gap (Percent, Yearly). Source: WEO. 
-output_gap_weo <- read_excel("WEO_Real_GDP.xlsx")
-output_gap_weo$output_gap <- output_gap_weo$'Output Gap'/100
+# output_gap_weo <- read_excel("WEO_Real_GDP.xlsx")
+# output_gap_weo$output_gap <- output_gap_weo$'Output Gap'/100
 
 # Create Time-Series Objects
-real_gdp_quarterly_ts <- ts(real_gdp$`Real GDP`, start = c(1991, 1), frequency = 4)
-potential_gdp_yearly_ts <- ts(potential_gdp$`Potential GDP (Ameco)`, start = c(1991, 1), frequency = 1)
-output_gap_weo_ts <- ts(output_gap_weo$`Output Gap`, start = c(1991, 1), frequency = 1)
+real_gdp_quarterly_ts <- ts(destatis_data$real_gdp, start = c(1991, 1), frequency = 4)
+potential_gdp_yearly_ts <- ts(ameco_data$potential_gdp, start = c(1991, 1), frequency = 1)
+output_gap_yearly_ameco_ts <- ts(ameco_data$output_gap[1:33], start = c(1991, 1), frequency = 1)
+real_gdp_yearly_ameco_ts <- ts(ameco_data$real_gdp[1:33], start = c(1991, 1), frequency = 1)
 
 #### Interpolation & Dataframe ####
 potential_interpolated <- td(potential_gdp_yearly_ts ~ 1, to = "quarterly", method = "denton-cholette", conversion = "sum")
@@ -35,6 +42,8 @@ quarterly_data <- tibble(
   real_gdp = real_gdp_quarterly_ts,
   output_gap = (real_gdp_quarterly_ts - (potential_gdp_quarterly_ts)[1:133])/(potential_gdp_quarterly_ts)[1:133]
 )
+
+output_gap_quaterly_ts <- ts(quarterly_data$output_gap, start = c(1991, 1), frequency = 4)
 
 # Data Investigation
 mean(quarterly_data$potential_gdp)
@@ -101,50 +110,73 @@ output_gap_plot_recent <- quarterly_data_recent %>%
   theme(legend.position = "none") +
   ylim(-10, 10)
 
-#### Comparing the output gap from the WEO with the interpolated output gap ####
-
-# Plot the output gap from the WEO over time (1991-2024)
-output_gap_plot_weo <- output_gap_weo %>%
+#### Comparing the output gap from Ameco with the interpolated output gap ####
+# Plot the output gap from the Europe Comission over time (1991-2024)
+output_gap_plot_ameco <- ameco_data %>%
   ggplot(aes(x = Year, y = (100*output_gap))) +
   geom_line(color = orange) +
   theme_minimal() +
-  labs(title = "Output Gap 1991-2024 (WEO-Estimates), Yearly Frequency",
+  labs(title = "Output Gap 1991-2024 (Ameco-Estimates), Yearly Frequency",
     x = "Year",
     y = "Output Gap in %") +
   theme(legend.position = "none") +
   ylim(-10, 10)
 
-# Plot the output gap from the WEO over time (2019-2024)
-output_gap_plot_weo_recent <- output_gap_weo %>%
+# Plot the output gap from the Europe Comission over time (2019-2024)
+output_gap_plot_ameco_recent <- ameco_data %>%
   filter(Year >= 2019) %>%
   ggplot(aes(x = Year, y = (100*output_gap))) +
   geom_line(color = orange) +
   theme_minimal() +
-  labs(title = "Output Gap 2019-2024 (WEO-Estimates), Yearly Frequency",
+  labs(title = "Output Gap 2019-2024 (Ameco-Estimates), Yearly Frequency",
     x = "Year",
     y = "Output Gap in %") +
   theme(legend.position = "none") +
   ylim(-10, 10)
 
-# Compare the plots of the interpolated output gap and the output gap from the WEO for the years 1991-2024
-combined_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_weo, nrow = 2)
-combined_plot
+# Compare the plots of the interpolated output gap and the output gap from Ameco for the years 1991-2024
+comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nrow = 2)
+comparison_plot
 
-# Compare the plots of the interpolated output gap and the output gap from the WEO for the years 2019-2024
-combined_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_weo_recent, nrow = 2)
-combined_plot_recent
+# Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
+comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
+comparison_plot_recent
 
 # Export the plots to a Svg file
 ggsave("potential_real_plot.svg", plot = potential_real_plot, device = "svg")
-ggsave("combined_plot.svg", plot = combined_plot, device = "svg")
-ggsave("combined_plot_recent.svg", plot = combined_plot_recent, device = "svg")
+ggsave("comparison_plot.svg", plot = comparison_plot, device = "svg")
+ggsave("comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
 
 # Investigating the validity of using Real GDP from Destatis and Potential GDP from AMECO
 # R^(2)_Measure for intercept = 0 and coefficient = 1
 
 Rsqr <- 1 - sum(((potential_gdp$'Real GDP (Ameco)')[1:33] - (potential_gdp$'Real GDP (Destatis)')[1:33])^(2))/sum(((potential_gdp$'Real GDP (Ameco)') - mean(potential_gdp$'Real GDP (Ameco)'))^(2))
 
-#### Comparing the output gap from the ECB with the interpolated output gap ####
+#### Comparing the output gap from Ameco and the ECB with the interpolated output gap ####
+
+# Aggregate quarterly real output to yearly data
+real_gdp_destatis_yearly_ts <- aggregate(real_gdp_quarterly_ts, FUN = sum)
+real_gdp_destatis_yearly_ts <- ts(real_gdp_destatis_yearly_ts[1:33], start = c(1991, 1), frequency = 1)
+potential_gdp_interpolated_yearly_ts <- aggregate(potential_gdp_quarterly_ts, FUN = sum)
+potential_gdp_interpolated_yearly_ts_short <- ts(potential_gdp_interpolated_yearly_ts[1:33], start = c(1991, 1), frequency = 1)
+
+output_gap_yearly_interpolated_ts <- (real_gdp_destatis_yearly_ts - potential_gdp_interpolated_yearly_ts_short)/potential_gdp_interpolated_yearly_ts_short
+
+# Combine the two ts objects into a data frame
+compare_output_gap <- data.frame(date = time(output_gap_yearly_interpolated_ts), output_gap_ameco = as.vector(output_gap_yearly_ameco_ts), output_gap_interpolated = as.vector(outputgap_yearly_interpolated_ts))
+
+# Plot the output gap in comparison
+compare_output_gap_plot <- compare_output_gap %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = output_gap_ameco, color = "Ameco Output Gap")) +
+  geom_line(aes(y = output_gap_interpolated, color = "Interpolated Output Gap")) +
+  theme_minimal() +
+  scale_color_manual(values = c("Ameco Output Gap" = blue, "Interpolated Output Gap" = red)) +
+  labs(title = "Yearly Ameco and Interpolated Output Gap",
+    x = "Year b",
+    y = "Output Gap in Percent") +
+  theme(legend.position = "bottom") +
+  labs(color = NULL)
 
 # Import the ECB_Data.xlsx file
 ecb_data <- read_excel("ECB_Data.xlsx")
@@ -170,3 +202,11 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
     y = "Output Gap") +
   theme(legend.position = "bottom") +
   labs(color = NULL)
+
+#### Taylor Rule Implied Interest Rate ####
+
+# Convert quarterly data to daily data
+daily_data <- quarterly_data %>%
+  complete(date = seq(min(date), max(date), by = "day")) %>%
+  fill(everything(), .direction = "down") %>%
+  mutate(date = as.Date(date))
