@@ -131,11 +131,11 @@ output_gap_plot_ameco_recent <- ameco_data %>%
 
 # Compare the plots of the interpolated output gap and the output gap from Ameco for the years 1991-2024
 comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nrow = 2)
-comparison_plot
+
 
 # Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
 comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
-comparison_plot_recent
+
 
 # Export the plots to a Svg file
 ggsave("potential_real_plot.svg", plot = potential_real_plot, device = "svg")
@@ -158,18 +158,19 @@ potential_gdp_yearly_interpolated_ts <- ts(aggregate(
 # This time series is identical to ameco_data$potential_gdp (as it should be)
 
 # Calculate the output gap for the yearly interpolated data
-output_gap_yearly_interpolated_ts <- (real_gdp_destatis_yearly_ts-potential_gdp_yearly_interpolated_ts)/potential_gdp_yearly_interpolated_ts
+output_gap_yearly_interpolated_ts <- (real_gdp_yearly_destatis_ts-potential_gdp_yearly_interpolated_ts)/potential_gdp_yearly_interpolated_ts
 
 # Combine the two ts objects into a data frame
 compare_output_gap <- data.frame(
   date = time(output_gap_yearly_interpolated_ts),
   output_gap_ameco = as.vector(output_gap_yearly_ameco_ts),
-  output_gap_interpolated = as.vector(output_gap_yearly_interpolated_ts),
+  output_gap_interpolated = as.vector(output_gap_yearly_interpolated_ts)
   #output_gap_ameco_own = (ameco_data$real_gdp - ameco_data$potential_gdp)/ameco_data$potential_gdp[1:33]
 )
 
 # Plot the output gap in comparison
 compare_output_gap_plot <- compare_output_gap %>%
+#  filter(date >= 2019) %>%
   ggplot(aes(x = date)) +
   geom_line(aes(y = 100*output_gap_ameco, color = "Ameco Output Gap")) +
   geom_line(aes(y = 100*output_gap_interpolated, color = "Interpolated Output Gap")) +
@@ -229,3 +230,38 @@ daily_data <- quarterly_data %>%
   complete(date = seq(min(date), max(date), by = "day")) %>%
   fill(everything(), .direction = "down") %>%
   mutate(date = as.Date(date))
+
+# Read in the .RData file
+load("CPI_measures_daily.RData")
+
+daily_data <- left_join(daily_data, CPI_measures_d, by = c("date" = "Day"))
+taylor_rule <- daily_data %>%
+  select(date, output_gap, pi_yoy) %>%
+  filter(!is.na(output_gap) & !is.na(pi_yoy))
+
+# Calculate the Taylor Rule Implied Interest Rate
+taylor_rule <- taylor_rule %>%
+  mutate(
+    output_gap = 100 * output_gap
+  )
+
+# Calculate the Taylor Rule Implied Interest Rate
+taylor_rule <- taylor_rule %>%
+  mutate(
+    taylor_rate = 0 + 1.5 * (pi_yoy - 2) + 0.5 * output_gap
+  )
+
+taylor_rule_plot <- taylor_rule %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
+  geom_line(aes(y = pi_yoy, color = "CPI"), linetype = "dashed") +
+  geom_line(aes(y = output_gap, color = "Output Gap"), linetype = "dashed") +
+  theme_minimal() +
+  scale_color_manual(values = c("Taylor Rate" = "#288628", "CPI" = "#9e9e15", "Output Gap" = blue)) +
+  labs(title = "Taylor Rule Implied Interest Rate, Daily Frequency",
+    x = "Date",
+    y = "Interest Rate, CPI, Output Gap in %",
+    color = "Variables") +
+  theme(legend.position = "bottom") +
+  theme(aspect.ratio=9/16)
+  #coord_fixed(ratio = 50)
