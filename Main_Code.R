@@ -32,7 +32,7 @@ potential_gdp_quarterly_interpolated_ts <- ts(predict(potential_gdp_interpolated
 quarterly_data <- tibble(
   date = seq(as.Date("1991-01-01"), as.Date("2024-01-01"), by = "quarter"),
   potential_gdp = as.vector(potential_gdp_quarterly_interpolated_ts)[1:133],
-  real_gdp =  as.vector(real_gdp_quarterly_destatis_ts)[1:133],
+  real_gdp = as.vector(real_gdp_quarterly_destatis_ts)[1:133],
   output_gap = (real_gdp_quarterly_destatis_ts - (potential_gdp_quarterly_interpolated_ts))/(potential_gdp_quarterly_interpolated_ts)
 )
 
@@ -235,23 +235,25 @@ daily_data <- quarterly_data %>%
 load("CPI_measures_daily.RData")
 
 daily_data <- left_join(daily_data, CPI_measures_d, by = c("date" = "Day"))
-taylor_rule <- daily_data %>%
+interest_daily_data <- daily_data %>%
   select(date, output_gap, pi_yoy) %>%
   filter(!is.na(output_gap) & !is.na(pi_yoy))
 
-# Calculate the Taylor Rule Implied Interest Rate
-taylor_rule <- taylor_rule %>%
+# Fit the Value of ouput_gap into percent format
+interest_daily_data <- interest_daily_data %>%
   mutate(
     output_gap = 100 * output_gap
   )
 
 # Calculate the Taylor Rule Implied Interest Rate
-taylor_rule <- taylor_rule %>%
+interest_daily_data <- interest_daily_data %>%
   mutate(
     taylor_rate = 0 + 1.5 * (pi_yoy - 2) + 0.5 * output_gap
   )
+# Calculate the overshoot of the inflation rate
+interest_daily_data <- interest_daily_data %>% mutate(pi_overshoot = pi_yoy - 2)
 
-taylor_rule_plot <- taylor_rule %>% 
+taylor_rule_plot <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
   geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
   geom_line(aes(y = pi_yoy, color = "CPI"), linetype = "dashed") +
@@ -265,3 +267,27 @@ taylor_rule_plot <- taylor_rule %>%
   theme(legend.position = "bottom") +
   theme(aspect.ratio=9/16)
   #coord_fixed(ratio = 50)
+
+# Actual Interest Rate
+interest_rate <- read_excel("Policy_Rate_ECB.xlsx")
+
+interest_daily_data <- left_join(interest_daily_data, interest_rate, by = c("date" = "Day"))
+
+interest_rate_comparision <- interest_daily_data %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
+  geom_line(aes(y = fixed_rate, color = "Fixed Rate"), linetype = "dashed") +
+  geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
+  geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot")) +
+  theme_minimal() +
+  scale_color_manual(values = c("Taylor Rate" = "#288628", "Fixed Rate" = "#9e9e15", "Deposit Rate" = blue, "Pi Overshoot" = red)) +
+  labs(title = "Taylor Rule Implied and ECB Interest Rates, Daily Frequency",
+    x = "Date",
+    y = "Interest Rate in %",
+    color = "Variables") +
+  theme(legend.position = "bottom") +
+  theme(aspect.ratio=9/16)
+  #coord_fixed(ratio = 50)
+
+ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
+ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
