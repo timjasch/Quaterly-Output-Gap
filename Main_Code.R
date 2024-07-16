@@ -289,5 +289,19 @@ interest_rate_comparision <- interest_daily_data %>%
   theme(aspect.ratio=9/16)
   #coord_fixed(ratio = 50)
 
+interest_rate_gap <- interest_daily_data %>% 
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = taylor_rate, color = "Taylor Rate"), linetype = "dashed") +
+  geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
+    geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
+  theme_minimal() +
+  scale_color_manual(values = c("Taylor Rate" = "#288628", "Taylor-Gap" = "#9e9e15", "Deposit Rate" = blue, "Pi Overshoot" = red)) +
+  labs(title = "Implied Taylor Rule, ECB Dposit Rate and Gap between them, Daily Frequency",
+    x = "Date",
+    y = "Interest Rate in %",
+    color = "Variables") +
+  theme(legend.position = "bottom") +
+  theme(aspect.ratio=9/16)
+
 ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
 ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
