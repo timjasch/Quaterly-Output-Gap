@@ -138,13 +138,13 @@ comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_
 
 
 # Export the plots to a Svg and pdf file
-ggsave("potential_real_plot.svg", plot = potential_real_plot, device = "svg")
-ggsave("comparison_plot.svg", plot = comparison_plot, device = "svg")
-ggsave("comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
+ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
+ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
+ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
 
-ggsave("potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
-ggsave("comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
-ggsave("comparison_plot_recent.pdf", plot = comparison_plot_recent, width = 16, height = 9, units = "in")
+ggsave("PDFs/potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_plot_recent.pdf", plot = comparison_plot_recent, width = 16, height = 9, units = "in")
 
 #### Comparing output gap: yearly AMECO, yearly Interpolated ####
 
@@ -187,8 +187,8 @@ compare_output_gap_plot <- compare_output_gap %>%
   labs(color = NULL) +
   ylim(-10, 10)
 
-ggsave("compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
-ggsave("compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
+ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
+ggsave("PDFs/compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
 
 # Investigating the validity of using Real GDP from Destatis and Potential GDP from AMECO
 
@@ -305,11 +305,14 @@ interest_rate_gap <- interest_daily_data %>%
     color = "Variables") +
   theme(legend.position = "bottom")
 
-ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
-ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
-ggsave("interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
+ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
+ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
+ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
 
-nterest_ap, width = 16, height = 9, units = "in")
+ggsave("PDFs/taylor_rule_plot.pdf", plot = taylor_rule_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_interest_rates.pdf", plot = interest_rate_comparision, width = 16, height = 9, units = "in")
+ggsave("PDFs/interest_rate_gap.pdf", plot = interest_rate_gap, width = 16, height = 9, units = "in")
+
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
 
