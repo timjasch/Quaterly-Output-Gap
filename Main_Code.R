@@ -305,3 +305,6 @@ interest_rate_gap <- interest_daily_data %>%
 
 ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
 ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
+
+# Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
+save(interest_daily_data, file = "interest_daily_data.RData")
