@@ -227,9 +227,11 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
 
 # Convert quarterly data to daily data
 daily_data <- quarterly_data %>%
+  add_row(date = as.Date("2024-04-01"))  %>%
   complete(date = seq(min(date), max(date), by = "day")) %>%
   fill(everything(), .direction = "down") %>%
-  mutate(date = as.Date(date))
+  mutate(date = as.Date(date)) %>%
+  slice(1:n()-1)
 
 # Read in the .RData file
 load("CPI_measures_daily.RData")
@@ -280,7 +282,7 @@ interest_rate_comparision <- interest_daily_data %>%
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
   geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot")) +
   theme_minimal() +
-  scale_color_manual(values = c("Taylor Rate" = "#288628", "Fixed Rate" = "#9e9e15", "Deposit Rate" = blue, "Pi Overshoot" = red)) +
+  scale_color_manual(values = c("Taylor Rate" = "#288628", "Fixed Rate" = "#9e9e15", "Deposit Rate" = blue, "Inflation Overshoot" = red)) +
   labs(title = "Taylor Rule Implied and ECB Interest Rates, Daily Frequency",
     x = "Date",
     y = "Interest Rate in %",
@@ -305,6 +307,7 @@ interest_rate_gap <- interest_daily_data %>%
 
 ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
 ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
+ggsave("interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
 
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
@@ -315,3 +318,5 @@ save(interest_daily_data, file = "interest_daily_data.RData")
 shadow_rate <- read_excel("Shadow_Rate.xlsx")
 # Convert the date to a date format, the date is in Format YYMMDD
 shadow_rate <- shadow_rate %>% mutate(date = as.Date(as.character(date), format = "%y%m%d"))
+# Add the shadow rate to the daily data, keep non-matching rows
+interest_daily_data <- left_join(interest_daily_data, shadow_rate, by = c("date" = "date"))
