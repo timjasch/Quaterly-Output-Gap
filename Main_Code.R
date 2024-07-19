@@ -137,10 +137,14 @@ comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nr
 comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
 
 
-# Export the plots to a Svg file
+# Export the plots to a Svg and pdf file
 ggsave("potential_real_plot.svg", plot = potential_real_plot, device = "svg")
 ggsave("comparison_plot.svg", plot = comparison_plot, device = "svg")
 ggsave("comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
+
+ggsave("potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
+ggsave("comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
+ggsave("comparison_plot_recent.pdf", plot = comparison_plot_recent, width = 16, height = 9, units = "in")
 
 #### Comparing output gap: yearly AMECO, yearly Interpolated ####
 
@@ -184,6 +188,7 @@ compare_output_gap_plot <- compare_output_gap %>%
   ylim(-10, 10)
 
 ggsave("compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
+ggsave("compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
 
 # Investigating the validity of using Real GDP from Destatis and Potential GDP from AMECO
 
@@ -266,9 +271,7 @@ taylor_rule_plot <- interest_daily_data %>%
     x = "Date",
     y = "Interest Rate, CPI, Output Gap in %",
     color = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(aspect.ratio=9/16)
-  #coord_fixed(ratio = 50)
+  theme(legend.position = "bottom")
 
 # Actual Interest Rate
 interest_rate <- read_excel("Policy_Rate_ECB.xlsx")
@@ -287,9 +290,7 @@ interest_rate_comparision <- interest_daily_data %>%
     x = "Date",
     y = "Interest Rate in %",
     color = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(aspect.ratio=9/16)
-  #coord_fixed(ratio = 50)
+  theme(legend.position = "bottom")
 
 interest_rate_gap <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
@@ -302,13 +303,13 @@ interest_rate_gap <- interest_daily_data %>%
     x = "Date",
     y = "Interest Rate in %",
     color = "Variables") +
-  theme(legend.position = "bottom") +
-  theme(aspect.ratio=9/16)
+  theme(legend.position = "bottom")
 
 ggsave("taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
 ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
 ggsave("interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
 
+nterest_ap, width = 16, height = 9, units = "in")
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
 
