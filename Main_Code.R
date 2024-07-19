@@ -308,3 +308,10 @@ ggsave("comparison_interest_rates.svg", plot = interest_rate_comparision, device
 
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
+
+#### Using a shadow rate to comapre to the Taylor rate ####
+
+# Read in the shadow rate data
+shadow_rate <- read_excel("Shadow_Rate.xlsx")
+# Convert the date to a date format, the date is in Format YYMMDD
+shadow_rate <- shadow_rate %>% mutate(date = as.Date(as.character(date), format = "%y%m%d"))
