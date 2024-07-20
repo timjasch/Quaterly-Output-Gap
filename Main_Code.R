@@ -4,6 +4,14 @@ library(dplyr)
 library(zoo)
 library(tempdisagg)
 library(svglite)
+# Using the CM Serif font, yes or no?
+CM <- TRUE
+# If CM = Yes, load the showtext library
+if (CM == TRUE) {
+  library(showtext)
+  font_add(family = "CM", regular = "C:/USERS/TIM JASCHECK/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/CMUNRM.TTF")
+  showtext_auto()
+}
 
 #### Read in the Excel files ####
 
@@ -61,7 +69,8 @@ potential_real_plot <- quarterly_data %>%
   labs(title = "Real and Potential GDP 1991-2024 (Potential Interpolated), Quarterly Frequency",
     x = "Year",
     y = "GDP (2015 Billion Euro)") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16)) +
   labs(color = NULL)
 
 # Plot the output gap over time (1991-2024)
@@ -72,7 +81,8 @@ output_gap_plot <- quarterly_data %>%
   labs(title = "Output Gap 1991-2024 (Interpolated), Quarterly Frequency",
     x = "Year",
     y = "Output Gap in %") +
-  theme(legend.position = "none") +
+  theme(legend.position = "none",
+        text = element_text(size = 16)) +
   ylim(-10, 10)
 
 # Filter the data for the years 2019-2024
@@ -89,7 +99,8 @@ potential_real_plot_recent <- quarterly_data_recent %>%
   labs(title = "Real and Potential GDP 2019-2024 (Potential Interpolated), Quarterly Frequency",
     x = "Year",
     y = "GDP (2015 Billion Euro)") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16)) +
   labs(color = NULL)
 
 # Plot the output gap over time (2019-2024)
@@ -100,7 +111,8 @@ output_gap_plot_recent <- quarterly_data_recent %>%
   labs(title = "Output Gap 2019-2024 (Interpolated), Quarterly Frequency",
     x = "Year",
     y = "Output Gap in %") +
-  theme(legend.position = "none") +
+  theme(legend.position = "none",
+        text = element_text(size = 16)) +
   ylim(-10, 10)
 
 #### Comparing output gap: yearly AMECO, quarterly Interpolated ####
@@ -113,7 +125,8 @@ output_gap_plot_ameco <- ameco_data %>%
   labs(title = "Output Gap 1991-2024 (Ameco-Estimates), Yearly Frequency",
     x = "Year",
     y = "Output Gap in %") +
-  theme(legend.position = "none") +
+  theme(legend.position = "none",
+        text = element_text(size = 16)) +
   ylim(-10, 10)
 
 # Plot the output gap from AMECO over time (2019-2024)
@@ -126,25 +139,9 @@ output_gap_plot_ameco_recent <- ameco_data %>%
     x = "Year",
     y = "Output Gap in %"
   ) +
-  theme(legend.position = "none") +
+  theme(legend.position = "none",
+        text = element_text(size = 16)) +
   ylim(-10, 10)
-
-# Compare the plots of the interpolated output gap and the output gap from Ameco for the years 1991-2024
-comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nrow = 2)
-
-
-# Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
-comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
-
-
-# Export the plots to a Svg and pdf file
-ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
-ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
-ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
-
-ggsave("PDFs/potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
-ggsave("PDFs/comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
-ggsave("PDFs/comparison_plot_recent.pdf", plot = comparison_plot_recent, width = 16, height = 9, units = "in")
 
 #### Comparing output gap: yearly AMECO, yearly Interpolated ####
 
@@ -183,12 +180,10 @@ compare_output_gap_plot <- compare_output_gap %>%
   labs(title = "Yearly Ameco and Interpolated Output Gap",
     x = "Year b",
     y = "Output Gap in Percent") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16)) +
   labs(color = NULL) +
   ylim(-10, 10)
-
-ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
-ggsave("PDFs/compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
 
 # Investigating the validity of using Real GDP from Destatis and Potential GDP from AMECO
 
@@ -225,7 +220,8 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
   labs(title = "Output Gap, estimated German and estimated EU, quarterly Frequency",
     x = "Year",
     y = "Output Gap") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        text = element_text(size = 16)) +
   labs(color = NULL)
 
 #### Taylor Rule Implied Interest Rate ####
@@ -271,7 +267,8 @@ taylor_rule_plot <- interest_daily_data %>%
     x = "Date",
     y = "Interest Rate, CPI, Output Gap in %",
     color = "Variables") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom",
+        text = element_text(size = 16))
 
 # Actual Interest Rate
 interest_rate <- read_excel("Policy_Rate_ECB.xlsx")
@@ -290,28 +287,22 @@ interest_rate_comparision <- interest_daily_data %>%
     x = "Date",
     y = "Interest Rate in %",
     color = "Variables") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom",
+        text = element_text(size = 16))
 
 interest_rate_gap <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
   geom_line(aes(y = taylor_rate, color = "Taylor Rate"), linetype = "dashed") +
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
-    geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
+  geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
   theme_minimal() +
   scale_color_manual(values = c("Taylor Rate" = "#288628", "Taylor-Gap" = "#9e9e15", "Deposit Rate" = blue, "Pi Overshoot" = red)) +
-  labs(title = "Implied Taylor Rule, ECB Dposit Rate and Gap between them, Daily Frequency",
+  labs(title = "Implied Taylor Rule, ECB Deposit Rate and Gap between them, Daily Frequency",
     x = "Date",
     y = "Interest Rate in %",
     color = "Variables") +
-  theme(legend.position = "bottom")
-
-ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
-ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
-ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
-
-ggsave("PDFs/taylor_rule_plot.pdf", plot = taylor_rule_plot, width = 16, height = 9, units = "in")
-ggsave("PDFs/comparison_interest_rates.pdf", plot = interest_rate_comparision, width = 16, height = 9, units = "in")
-ggsave("PDFs/interest_rate_gap.pdf", plot = interest_rate_gap, width = 16, height = 9, units = "in")
+  theme(legend.position = "bottom",
+        text = element_text(size = 16))
 
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
@@ -324,3 +315,41 @@ shadow_rate <- read_excel("Shadow_Rate.xlsx")
 shadow_rate <- shadow_rate %>% mutate(date = as.Date(as.character(date), format = "%y%m%d"))
 # Add the shadow rate to the daily data, keep non-matching rows
 interest_daily_data <- left_join(interest_daily_data, shadow_rate, by = c("date" = "date"))
+
+#### Plot Exports ####
+
+# Apply conditional theme modification for CM font
+if (CM == TRUE) {
+  potential_real_plot <- potential_real_plot + theme(text = element_text(family = "CM"))
+  # The four plots that will get combined
+  output_gap_plot <- output_gap_plot + theme(text = element_text(family = "CM"))
+  output_gap_plot_ameco <- output_gap_plot_ameco + theme(text = element_text(family = "CM"))
+  output_gap_plot_recent <- output_gap_plot_recent + theme(text = element_text(family = "CM"))
+  output_gap_plot_ameco_recent <- output_gap_plot_ameco_recent + theme(text = element_text(family = "CM"))
+  #
+  taylor_rule_plot <- taylor_rule_plot + theme(text = element_text(family = "CM"))
+  interest_rate_comparision <- interest_rate_comparision + theme(text = element_text(family = "CM"))
+  interest_rate_gap <- interest_rate_gap + theme(text = element_text(family = "CM"))
+  compare_output_gap_plot <- compare_output_gap_plot + theme(text = element_text(family = "CM"))
+}
+
+# Compare the plots of the interpolated output gap and the output gap from Ameco for the years 1991-2024
+comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nrow = 2)
+# Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
+comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
+
+ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
+ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
+ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
+ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
+ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
+ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
+ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
+
+ggsave("PDFs/potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_plot_recent.pdf", plot = comparison_plot_recent, width = 16, height = 9, units = "in")
+ggsave("PDFs/taylor_rule_plot.pdf", plot = taylor_rule_plot, width = 16, height = 9, units = "in")
+ggsave("PDFs/comparison_interest_rates.pdf", plot = interest_rate_comparision, width = 16, height = 9, units = "in")
+ggsave("PDFs/interest_rate_gap.pdf", plot = interest_rate_gap, width = 16, height = 9, units = "in")
+ggsave("PDFs/compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
