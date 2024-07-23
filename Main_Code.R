@@ -1,3 +1,5 @@
+#### Preambel ####
+
 library(readxl)
 library(tidyverse)
 library(dplyr)
@@ -9,9 +11,17 @@ CM <- TRUE
 # If CM = Yes, load the showtext library
 if (CM == TRUE) {
   library(showtext)
-  font_add(family = "CM", regular = "C:/USERS/TIM JASCHECK/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/CMUNRM.TTF")
+  #font_add(family = "CM", regular = "C:/USERS/TIM JASCHECK/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/CMUNRM.TTF")
+  font_add(family = "CM", regular = "/Users/timjascheck/Documents/GitHub/Quaterly-Output-Gap/computer-modern/cmunrm.ttf")
   showtext_auto()
 }
+
+# Define colors
+red <- "#8B0000"
+blue <- "#00008B"
+orange <- "#FF8C27"
+yellow <- "#F0D22B"
+green <- "#3B9934"
 
 #### Read in the Excel files ####
 
@@ -53,11 +63,6 @@ mean(quarterly_data$output_gap)
 # Potential and Real GDP have similar means, the output gap is close to zero.
 
 #### Graphs ####
-
-# Define colors
-red <- "#8B0000"
-blue <- "#00008B"
-orange <- "#cc6e1b"
 
 # Plot the real and potential GDP over time (1991-2024)
 potential_real_plot <- quarterly_data %>%
@@ -262,7 +267,9 @@ taylor_rule_plot <- interest_daily_data %>%
   geom_line(aes(y = pi_yoy, color = "CPI"), linetype = "dashed") +
   geom_line(aes(y = output_gap, color = "Output Gap"), linetype = "dashed") +
   theme_minimal() +
-  scale_color_manual(values = c("Taylor Rate" = "#288628", "CPI" = "#9e9e15", "Output Gap" = blue)) +
+  scale_color_manual(values = c("Taylor Rate" = green,
+                                "CPI" = yellow,
+                                "Output Gap" = blue)) +
   labs(title = "Taylor Rule Implied Interest Rate, Daily Frequency",
     x = "Date",
     y = "Interest Rate, CPI, Output Gap in %",
@@ -282,7 +289,7 @@ interest_rate_comparision <- interest_daily_data %>%
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
   geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot")) +
   theme_minimal() +
-  scale_color_manual(values = c("Taylor Rate" = "#288628", "Fixed Rate" = "#9e9e15", "Deposit Rate" = blue, "Inflation Overshoot" = red)) +
+  scale_color_manual(values = c("Taylor Rate" = green, "Fixed Rate" = yellow, "Deposit Rate" = blue, "Inflation Overshoot" = red)) +
   labs(title = "Taylor Rule Implied and ECB Interest Rates, Daily Frequency",
     x = "Date",
     y = "Interest Rate in %",
@@ -296,7 +303,7 @@ interest_rate_gap <- interest_daily_data %>%
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
   geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
   theme_minimal() +
-  scale_color_manual(values = c("Taylor Rate" = "#288628", "Taylor-Gap" = "#9e9e15", "Deposit Rate" = blue, "Pi Overshoot" = red)) +
+  scale_color_manual(values = c("Taylor Rate" = green, "Taylor-Gap" = yellow, "Deposit Rate" = blue, "Pi Overshoot" = red)) +
   labs(title = "Implied Taylor Rule, ECB Deposit Rate and Gap between them, Daily Frequency",
     x = "Date",
     y = "Interest Rate in %",
