@@ -75,7 +75,7 @@ potential_real_plot <- quarterly_data %>%
     x = "Year",
     y = "GDP (2015 Billion Euro)") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   labs(color = NULL)
 
 # Plot the output gap over time (1991-2024)
@@ -87,7 +87,7 @@ output_gap_plot <- quarterly_data %>%
     x = "Year",
     y = "Output Gap in %") +
   theme(legend.position = "none",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   ylim(-10, 10)
 
 # Filter the data for the years 2019-2024
@@ -105,7 +105,7 @@ potential_real_plot_recent <- quarterly_data_recent %>%
     x = "Year",
     y = "GDP (2015 Billion Euro)") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   labs(color = NULL)
 
 # Plot the output gap over time (2019-2024)
@@ -117,7 +117,7 @@ output_gap_plot_recent <- quarterly_data_recent %>%
     x = "Year",
     y = "Output Gap in %") +
   theme(legend.position = "none",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   ylim(-10, 10)
 
 #### Comparing output gap: yearly AMECO, quarterly Interpolated ####
@@ -131,7 +131,7 @@ output_gap_plot_ameco <- ameco_data %>%
     x = "Year",
     y = "Output Gap in %") +
   theme(legend.position = "none",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   ylim(-10, 10)
 
 # Plot the output gap from AMECO over time (2019-2024)
@@ -145,7 +145,7 @@ output_gap_plot_ameco_recent <- ameco_data %>%
     y = "Output Gap in %"
   ) +
   theme(legend.position = "none",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   ylim(-10, 10)
 
 #### Comparing output gap: yearly AMECO, yearly Interpolated ####
@@ -186,7 +186,7 @@ compare_output_gap_plot <- compare_output_gap %>%
     x = "Year b",
     y = "Output Gap in Percent") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   labs(color = NULL) +
   ylim(-10, 10)
 
@@ -226,7 +226,7 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
     x = "Year",
     y = "Output Gap") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16)) +
+        text = element_text(size = 18)) +
   labs(color = NULL)
 
 #### Taylor Rule Implied Interest Rate ####
@@ -275,7 +275,7 @@ taylor_rule_plot <- interest_daily_data %>%
     y = "Interest Rate, CPI, Output Gap in %",
     color = "Variables") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16))
+        text = element_text(size = 18))
 
 # Actual Interest Rate
 interest_rate <- read_excel("Policy_Rate_ECB.xlsx")
@@ -295,7 +295,7 @@ interest_rate_comparision <- interest_daily_data %>%
     y = "Interest Rate in %",
     color = "Variables") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16))
+        text = element_text(size = 18))
 
 interest_rate_gap <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
@@ -309,7 +309,7 @@ interest_rate_gap <- interest_daily_data %>%
     y = "Interest Rate in %",
     color = "Variables") +
   theme(legend.position = "bottom",
-        text = element_text(size = 16))
+        text = element_text(size = 18))
 
 # Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
 save(interest_daily_data, file = "interest_daily_data.RData")
