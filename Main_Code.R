@@ -11,9 +11,7 @@ CM <- TRUE
 # If CM = Yes, load the showtext library
 if (CM == TRUE) {
   library(showtext)
-  #font_add(family = "CM", regular = "C:/USERS/TIM JASCHECK/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/CMUNRM.TTF")
-  #font_add(family = "CM", regular = "/Users/timjascheck/Documents/GitHub/Quaterly-Output-Gap/computer-modern/cmunrm.ttf")
-  font_add(family = "CM", regular = "computer-modern/cmunsl.ttf")
+  font_add(family = "CM", regular = "computer-modern/cmunrm.ttf", italic = "computer-modern/cmunsl.ttf")
   showtext_auto()
 }
 
