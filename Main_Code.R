@@ -12,7 +12,8 @@ CM <- TRUE
 if (CM == TRUE) {
   library(showtext)
   #font_add(family = "CM", regular = "C:/USERS/TIM JASCHECK/APPDATA/LOCAL/MICROSOFT/WINDOWS/FONTS/CMUNRM.TTF")
-  font_add(family = "CM", regular = "/Users/timjascheck/Documents/GitHub/Quaterly-Output-Gap/computer-modern/cmunrm.ttf")
+  #font_add(family = "CM", regular = "/Users/timjascheck/Documents/GitHub/Quaterly-Output-Gap/computer-modern/cmunrm.ttf")
+  font_add(family = "CM", regular = "computer-modern/cmunsl.ttf")
   showtext_auto()
 }
 
