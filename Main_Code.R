@@ -72,7 +72,7 @@ potential_real_plot <- quarterly_data %>%
   theme_minimal() +
   scale_color_manual(values = c("Potential GDP" = blue, "Real GDP" = red)) +
   labs(title = "Real and Potential GDP 1991-2024 (Potential Interpolated), Quarterly Frequency",
-    x = "Year",
+    x = "Date",
     y = "GDP (2015 Billion Euro)") +
   theme(legend.position = "bottom",
         text = element_text(size = 18)) +
@@ -84,7 +84,7 @@ output_gap_plot <- quarterly_data %>%
   geom_line(color = orange) +
   theme_minimal() +
   labs(title = "Output Gap 1991-2024 (Interpolated), Quarterly Frequency",
-    x = "Year",
+    x = "Date",
     y = "Output Gap in %") +
   theme(legend.position = "none",
         text = element_text(size = 18)) +
@@ -102,7 +102,7 @@ potential_real_plot_recent <- quarterly_data_recent %>%
   theme_minimal() +
   scale_color_manual(values = c("Potential GDP" = blue, "Real GDP" = red)) +
   labs(title = "Real and Potential GDP 2019-2024 (Potential Interpolated), Quarterly Frequency",
-    x = "Year",
+    x = "Date",
     y = "GDP (2015 Billion Euro)") +
   theme(legend.position = "bottom",
         text = element_text(size = 18)) +
@@ -114,7 +114,7 @@ output_gap_plot_recent <- quarterly_data_recent %>%
   geom_line(color = orange) +
   theme_minimal() +
   labs(title = "Output Gap 2019-2024 (Interpolated), Quarterly Frequency",
-    x = "Year",
+    x = "Date",
     y = "Output Gap in %") +
   theme(legend.position = "none",
         text = element_text(size = 18)) +
@@ -128,7 +128,7 @@ output_gap_plot_ameco <- ameco_data %>%
   geom_line(color = orange) +
   theme_minimal() +
   labs(title = "Output Gap 1991-2024 (Ameco-Estimates), Yearly Frequency",
-    x = "Year",
+    x = "Date",
     y = "Output Gap in %") +
   theme(legend.position = "none",
         text = element_text(size = 18)) +
@@ -141,7 +141,7 @@ output_gap_plot_ameco_recent <- ameco_data %>%
   geom_line(color = orange) +
   theme_minimal() +
   labs(title = "Output Gap 2019-2024 (Ameco-Estimates), Yearly Frequency",
-    x = "Year",
+    x = "Date",
     y = "Output Gap in %"
   ) +
   theme(legend.position = "none",
@@ -183,7 +183,7 @@ compare_output_gap_plot <- compare_output_gap %>%
   theme_minimal() +
   scale_color_manual(values = c("Ameco Output Gap" = blue, "Interpolated Output Gap" = red)) +
   labs(title = "Yearly Ameco and Interpolated Output Gap",
-    x = "Year b",
+    x = "Date",
     y = "Output Gap in Percent") +
   theme(legend.position = "bottom",
         text = element_text(size = 18)) +
@@ -223,7 +223,7 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
   theme_minimal() +
   scale_color_manual(values = c("Output Gap (Germany, Estimate)" = orange, "Output Gap (EU, ECB)" = "blue")) +
   labs(title = "Output Gap, estimated German and estimated EU, quarterly Frequency",
-    x = "Year",
+    x = "Date",
     y = "Output Gap") +
   theme(legend.position = "bottom",
         text = element_text(size = 18)) +
@@ -233,11 +233,9 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
 
 # Convert quarterly data to daily data
 daily_data <- quarterly_data %>%
-  add_row(date = as.Date("2024-04-01"))  %>%
-  complete(date = seq(min(date), max(date), by = "day")) %>%
+  complete(date = seq(min(date), as.Date("2024-03-31"), by = "day")) %>%
   fill(everything(), .direction = "down") %>%
-  mutate(date = as.Date(date)) %>%
-  slice(1:n()-1)
+  mutate(date = as.Date(date))
 
 # Read in the .RData file
 load("CPI_measures_daily.RData")
