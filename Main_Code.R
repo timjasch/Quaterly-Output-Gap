@@ -309,9 +309,6 @@ interest_rate_gap <- interest_daily_data %>%
   theme(legend.position = "bottom",
         text = element_text(size = 18))
 
-# Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
-save(interest_daily_data, file = "interest_daily_data.RData")
-
 #### Using a shadow rate to compare to the Taylor rate ####
 
 # Read in the shadow rate data
@@ -366,6 +363,11 @@ interest_rate_gap_shadow <- interest_daily_data %>%
     color = "Variables") +
   theme(legend.position = "bottom",
         text = element_text(size = 18))
+
+#### Save the data ####
+
+# Export the Taylor Rate and the Gap between the Taylor Rate and the ECB Deposit Rate as RData
+save(interest_daily_data, file = "interest_daily_data.RData")
 
 #### Generate the plots ####
 
