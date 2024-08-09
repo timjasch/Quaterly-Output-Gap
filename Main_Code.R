@@ -348,15 +348,16 @@ interest_rate_comparision_shadow <- interest_daily_data %>%
   theme(legend.position = "bottom",
         text = element_text(size = 18))
 
-interest_rate_gap_shadow <- interest_daily_data %>% 
+interest_rates_taylor <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
   geom_line(aes(y = taylor_rate, color = "Taylor Rate"), linetype = "dashed") +
-  geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
-  geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
-  geom_line(aes(y = shadow_rate, color = "Shadow Rate"), linetype = "dashed") +
-  geom_line(aes(y = taylor_rate - shadow_rate, color = "Taylor-Shadow-Gap")) +
+  geom_line(aes(y = deposit_rate, color = "Deposit Rate")) +
+  #geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
+  geom_line(aes(y = shadow_rate, color = "Shadow Rate")) +
+  geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot"), linetype = "dashed") +
+  #geom_line(aes(y = taylor_rate - shadow_rate, color = "Taylor-Shadow-Gap")) +
   theme_minimal() +
-  scale_color_manual(values = c("Taylor Rate" = green, "Taylor-Gap" = yellow, "Deposit Rate" = blue, "Pi Overshoot" = red, "Shadow Rate" = darkgrey, "Taylor-Shadow-Gap" = darkgrey)) +
+  scale_color_manual(values = c("Taylor Rate" = green, "Inflation Overshoot" = yellow, "Deposit Rate" = blue, "Pi Overshoot" = red, "Shadow Rate" = darkgrey, "Taylor-Shadow-Gap" = darkgrey)) +
   labs(title = "Implied Taylor Rule, ECB Deposit Rate and Gap between them, Daily Frequency",
     x = "Date",
     y = "Interest Rate in %",
@@ -386,6 +387,7 @@ if (CM == TRUE) {
   compare_output_gap_plot <- compare_output_gap_plot + theme(text = element_text(family = "CM"))
   interest_rate_comparision_shadow <- interest_rate_comparision_shadow + theme(text = element_text(family = "CM"))
   interest_rate_gap_shadow <- interest_rate_gap_shadow + theme(text = element_text(family = "CM"))
+  interest_rates_taylor <- interest_rates_taylor + theme(text = element_text(family = "CM"))
 }
 
 # Compare the plots of the interpolated output gap and the output gap from Ameco for the years 1991-2024
@@ -393,15 +395,15 @@ comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nr
 # Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
 comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
 
-ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
-ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
-ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
-ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
-ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
-ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
-ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
-ggsave("SVGs/interest_rate_comparision_shadow.svg", plot = interest_rate_comparision_shadow, device = "svg")
-ggsave("SVGs/interest_rate_gap_shadow.svg", plot = interest_rate_gap_shadow, device = "svg")
+#ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
+#ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
+#ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
+#ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
+#ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
+#ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
+#ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
+#ggsave("SVGs/interest_rate_comparision_shadow.svg", plot = interest_rate_comparision_shadow, device = "svg")
+#ggsave("SVGs/interest_rate_gap_shadow.svg", plot = interest_rate_gap_shadow, device = "svg")
 
 ggsave("PDFs/potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
 ggsave("PDFs/comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
@@ -412,3 +414,4 @@ ggsave("PDFs/interest_rate_gap.pdf", plot = interest_rate_gap, width = 16, heigh
 ggsave("PDFs/compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
 ggsave("PDFs/interest_rate_comparision_shadow.pdf", plot = interest_rate_comparision_shadow, width = 16, height = 9, units = "in")
 ggsave("PDFs/interest_rate_gap_shadow.pdf", plot = interest_rate_gap_shadow, width = 16, height = 9, units = "in")
+ggsave("PDFs/interest_rates_taylor.pdf", plot = interest_rates_taylor, width = 16, height = 9, units = "in")
