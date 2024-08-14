@@ -110,7 +110,7 @@ potential_real_plot_recent <- quarterly_data_recent %>%
 
 # Plot the output gap over time (2019-2024)
 output_gap_plot_recent <- quarterly_data_recent %>%
-  ggplot(aes(x = date, y = (100*output_gap))) +
+  ggplot(aes(x = date, y = (100 * output_gap))) +
   geom_line(color = orange) +
   theme_minimal() +
   labs(title = "Output Gap 2019-2024 (Interpolated), Quarterly Frequency",
@@ -231,6 +231,11 @@ output_ecb_plot_recent <- combined_ouput_gap %>%
 
 #### Taylor Rule Implied Interest Rate ####
 
+quarterly_data <- as.data.frame(quarterly_data)
+quarterly_data$potential_gdp_lag = lag(quarterly_data$potential_gdp, 1)
+quarterly_data$real_gdp_lag = lag(quarterly_data$real_gdp, 1)
+quarterly_data$output_gap_lag = lag(as.vector(quarterly_data$output_gap), 1)
+
 # Convert quarterly data to daily data
 daily_data <- quarterly_data %>%
   complete(date = seq(min(date), as.Date("2024-03-31"), by = "day")) %>%
@@ -242,26 +247,33 @@ load("CPI_measures_daily.RData")
 
 daily_data <- left_join(daily_data, CPI_measures_d, by = c("date" = "Day"))
 interest_daily_data <- daily_data %>%
-  select(date, output_gap, pi_yoy) %>%
-  filter(!is.na(output_gap) & !is.na(pi_yoy))
+  select(date, output_gap, output_gap_lag, pi_yoy, pi_yoy_lag1) %>%
+  filter(!is.na(output_gap) & !is.na(output_gap_lag) & !is.na(pi_yoy) & !is.na(pi_yoy_lag1)) %>%
+  rename(pi_yoy_lag = pi_yoy_lag1)
 
 # Fit the Value of ouput_gap into percent format
 interest_daily_data <- interest_daily_data %>%
-  mutate(
-    output_gap = 100 * output_gap
-  )
+    mutate(output_gap = 100 * output_gap)
 
 # Calculate the Taylor Rule Implied Interest Rate
 interest_daily_data <- interest_daily_data %>%
   mutate(
-    taylor_rate = 0 + 1.5 * (pi_yoy - 2) + 0.5 * output_gap
-  )
+    taylor_rate_0 = 0 + 1.5 * (pi_yoy - 2) + 0.5 * output_gap,
+    taylor_rate_2 = 2 + 1.5 * (pi_yoy - 2) + 0.5 * output_gap,
+    simple_taylor_rate_0 = 0 + 1.5 * (pi_yoy - 2),
+    simple_taylor_rate_2 = 2 + 1.5 * (pi_yoy - 2),
+    taylor_rate_0_lag = 0 + 1.5 * (pi_yoy_lag - 2) + 0.5 * output_gap_lag,
+    taylor_rate_2_lag = 2 + 1.5 * (pi_yoy_lag - 2) + 0.5 * output_gap_lag,
+    simple_taylor_rate_0_lag = 0 + 1.5 * (pi_yoy_lag - 2),
+    simple_taylor_rate_2_lag = 2 + 1.5 * (pi_yoy_lag - 2)
+)
+
 # Calculate the overshoot of the inflation rate
 interest_daily_data <- interest_daily_data %>% mutate(pi_overshoot = pi_yoy - 2)
 
 taylor_rule_plot <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
-  geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
+  geom_line(aes(y = taylor_rate_0, color = "Taylor Rate")) +
   geom_line(aes(y = pi_yoy, color = "CPI"), linetype = "dashed") +
   geom_line(aes(y = output_gap, color = "Output Gap"), linetype = "dashed") +
   theme_minimal() +
@@ -282,7 +294,7 @@ interest_daily_data <- left_join(interest_daily_data, interest_rate, by = c("dat
 
 interest_rate_comparision <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
-  geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
+  geom_line(aes(y = taylor_rate_0, color = "Taylor Rate")) +
   geom_line(aes(y = fixed_rate, color = "Fixed Rate"), linetype = "dashed") +
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
   geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot")) +
@@ -297,9 +309,9 @@ interest_rate_comparision <- interest_daily_data %>%
 
 interest_rate_gap <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
-  geom_line(aes(y = taylor_rate, color = "Taylor Rate"), linetype = "dashed") +
+  geom_line(aes(y = taylor_rate_0, color = "Taylor Rate"), linetype = "dashed") +
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
-  geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
+  geom_line(aes(y = taylor_rate_0 - deposit_rate, color = "Taylor-Gap")) +
   theme_minimal() +
   scale_color_manual(values = c("Taylor Rate" = green, "Taylor-Gap" = yellow, "Deposit Rate" = blue, "Pi Overshoot" = red)) +
   labs(title = "Implied Taylor Rule, ECB Deposit Rate and Gap between them, Daily Frequency",
@@ -334,7 +346,7 @@ interest_daily_data <- left_join(interest_daily_data, shadow_rate, by = c("date"
 
 interest_rate_comparision_shadow <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
-  geom_line(aes(y = taylor_rate, color = "Taylor Rate")) +
+  geom_line(aes(y = taylor_rate_0, color = "Taylor Rate")) +
   geom_line(aes(y = fixed_rate, color = "Fixed Rate"), linetype = "dashed") +
   geom_line(aes(y = deposit_rate, color = "Deposit Rate"), linetype = "dashed") +
   geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot")) +
@@ -350,12 +362,12 @@ interest_rate_comparision_shadow <- interest_daily_data %>%
 
 interest_rates_taylor <- interest_daily_data %>% 
   ggplot(aes(x = date)) +
-  geom_line(aes(y = taylor_rate, color = "Taylor Rate"), linetype = "dashed") +
+  geom_line(aes(y = taylor_rate_0, color = "Taylor Rate"), linetype = "dashed") +
   geom_line(aes(y = deposit_rate, color = "Deposit Rate")) +
-  #geom_line(aes(y = taylor_rate - deposit_rate, color = "Taylor-Gap")) +
+  #geom_line(aes(y = taylor_rate_0 - deposit_rate, color = "Taylor-Gap")) +
   geom_line(aes(y = shadow_rate, color = "Shadow Rate")) +
   geom_line(aes(y = pi_overshoot, color = "Inflation Overshoot"), linetype = "dashed") +
-  #geom_line(aes(y = taylor_rate - shadow_rate, color = "Taylor-Shadow-Gap")) +
+  #geom_line(aes(y = taylor_rate_0 - shadow_rate, color = "Taylor-Shadow-Gap")) +
   theme_minimal() +
   scale_color_manual(values = c("Taylor Rate" = green, "Inflation Overshoot" = yellow, "Deposit Rate" = blue, "Pi Overshoot" = red, "Shadow Rate" = darkgrey, "Taylor-Shadow-Gap" = darkgrey)) +
   labs(title = "Implied Taylor Rule, ECB Deposit Rate and Gap between them, Daily Frequency",
@@ -386,7 +398,6 @@ if (CM == TRUE) {
   interest_rate_gap <- interest_rate_gap + theme(text = element_text(family = "CM"))
   compare_output_gap_plot <- compare_output_gap_plot + theme(text = element_text(family = "CM"))
   interest_rate_comparision_shadow <- interest_rate_comparision_shadow + theme(text = element_text(family = "CM"))
-  interest_rate_gap_shadow <- interest_rate_gap_shadow + theme(text = element_text(family = "CM"))
   interest_rates_taylor <- interest_rates_taylor + theme(text = element_text(family = "CM"))
 }
 
@@ -394,16 +405,6 @@ if (CM == TRUE) {
 comparison_plot <- cowplot::plot_grid(output_gap_plot, output_gap_plot_ameco, nrow = 2)
 # Compare the plots of the interpolated output gap and the output gap from the Ameco for the years 2019-2024
 comparison_plot_recent <- cowplot::plot_grid(output_gap_plot_recent, output_gap_plot_ameco_recent, nrow = 2)
-
-#ggsave("SVGs/potential_real_plot.svg", plot = potential_real_plot, device = "svg")
-#ggsave("SVGs/comparison_plot.svg", plot = comparison_plot, device = "svg")
-#ggsave("SVGs/comparison_plot_recent.svg", plot = comparison_plot_recent, device = "svg")
-#ggsave("SVGs/taylor_rule_plot.svg", plot = taylor_rule_plot, device = "svg")
-#ggsave("SVGs/comparison_interest_rates.svg", plot = interest_rate_comparision, device = "svg")
-#ggsave("SVGs/interest_rate_gap.svg", plot = interest_rate_gap, device = "svg")
-#ggsave("SVGs/compare_output_gap_plot.svg", plot = compare_output_gap_plot, device = "svg")
-#ggsave("SVGs/interest_rate_comparision_shadow.svg", plot = interest_rate_comparision_shadow, device = "svg")
-#ggsave("SVGs/interest_rate_gap_shadow.svg", plot = interest_rate_gap_shadow, device = "svg")
 
 ggsave("PDFs/potential_real_plot.pdf", plot = potential_real_plot, width = 16, height = 9, units = "in")
 ggsave("PDFs/comparison_plot.pdf", plot = comparison_plot, width = 16, height = 9, units = "in")
@@ -413,5 +414,4 @@ ggsave("PDFs/comparison_interest_rates.pdf", plot = interest_rate_comparision, w
 ggsave("PDFs/interest_rate_gap.pdf", plot = interest_rate_gap, width = 16, height = 9, units = "in")
 ggsave("PDFs/compare_output_gap_plot.pdf", plot = compare_output_gap_plot, width = 16, height = 9, units = "in")
 ggsave("PDFs/interest_rate_comparision_shadow.pdf", plot = interest_rate_comparision_shadow, width = 16, height = 9, units = "in")
-ggsave("PDFs/interest_rate_gap_shadow.pdf", plot = interest_rate_gap_shadow, width = 16, height = 9, units = "in")
 ggsave("PDFs/interest_rates_taylor.pdf", plot = interest_rates_taylor, width = 16, height = 9, units = "in")
